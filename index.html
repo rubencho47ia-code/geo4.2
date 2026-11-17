@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La Encuesta · Estadística 4°</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<style>
+:root{--bg:#fff8e7;--card:#fff;--ink:#2b2d42;--a:#3a86ff;--ok:#2a9d8f;--bad:#e63946;--y:#ffbe0b}
+@media (prefers-color-scheme:dark){:root{--bg:#1d2233;--card:#283048;--ink:#f1f3f9}}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Comic Sans MS","Trebuchet MS",sans-serif;background:var(--bg);color:var(--ink);font-size:18px;line-height:1.5}
+header{background:var(--a);color:#fff;padding:14px 16px;text-align:center}
+header h1{margin:0;font-size:1.5rem}
+header input[type=text]{margin-top:8px;width:min(420px,90%)}
+nav{display:flex;gap:8px;justify-content:center;padding:10px;position:sticky;top:0;background:var(--bg);z-index:5}
+nav button{background:var(--card);color:var(--ink);border:2px solid var(--a);border-radius:20px;padding:8px 18px;font:inherit;cursor:pointer}
+nav button.on{background:var(--y);color:#222;border-color:var(--y)}
+main{max-width:820px;margin:auto;padding:10px 14px 60px}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border-radius:14px;padding:12px 16px;margin:12px 0;box-shadow:0 2px 6px #0002}
+h2{margin:.3em 0}
+input,select{font:inherit;padding:8px;border:2px solid #aab;border-radius:10px;width:100%;color:#222}
+button.b{background:var(--a);color:#fff;border:0;border-radius:12px;padding:8px 14px;font:inherit;cursor:pointer;margin:4px 4px 4px 0}
+button.g{background:var(--ok)}
+.opt{display:block;width:100%;text-align:left;margin:5px 0;padding:8px 12px;border:2px solid #aab;border-radius:10px;background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.opt.sel{border-color:var(--a);background:#3a86ff33}.opt.ok{border-color:var(--ok);background:#2a9d8f44}.opt.bad{border-color:var(--bad);background:#e6394644}
+.tag{font-size:.7rem;background:var(--y);color:#222;border-radius:8px;padding:1px 7px}
+table{border-collapse:collapse;width:100%}th,td{border:2px solid #aab;padding:6px;text-align:center}th{background:var(--a);color:#fff}
+.tip{background:#ffbe0b33;border-left:5px solid var(--y);padding:6px 10px;margin:6px 0;border-radius:6px;font-size:.95rem}
+svg{max-width:100%;height:auto}
+.big{font-size:3rem;text-align:center;margin:0}
+.hb{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
+.hb select{width:auto;max-width:90%;padding:5px}
+.hb button{background:#fff;color:#222;border:0;border-radius:14px;padding:5px 10px;font:inherit;font-size:.8rem;cursor:pointer}
+@media print{nav,header input,.hb,.no{display:none}}
+</style>
+</head>
+<body>
+<header><h1>📊 La Encuesta: ¡Aprendo y me evalúo!</h1>
+<input type="text" id="nm" placeholder="✏️ Escribe tu nombre aquí" oninput="S.name=this.value;save()">
+<div class="hb"><select id="pf" onchange="pickProf(this.value)"></select>
+<button onclick="nuevo()">➕ Nuevo estudiante</button><button onclick="fileSave()">💾 Guardar en archivo</button><button onclick="$('fl').click()">📂 Cargar archivo</button>
+<input type="file" id="fl" accept=".json" hidden onchange="fileLoad(this)"></div>
+<div style="font-size:.8rem;margin-top:4px">Tu avance se guarda solo en este equipo. Para seguir en otro computador, usa 💾 y luego 📂.</div></header>
+<nav id="nav"></nav>
+<main>
+
+<section id="s0"><div class="card"><h2>📘 Teoría</h2>
+<p><b>Encuesta:</b> es hacer las mismas preguntas a varias personas para conocer sus gustos u opiniones. 🗣️</p>
+<p><b>Pasos:</b> 1️⃣ Elaborar las preguntas · 2️⃣ Recolectar los datos · 3️⃣ Hacer la tabla de frecuencia · 4️⃣ Dibujar los gráficos.</p>
+<div class="tip"><b>Pregunta bien escrita:</b> clara, corta, con una sola idea y con ¿ ?<br>❌ «fruta» → ✅ «¿Cuál es tu fruta favorita?»</div>
+<div class="tip"><b>Opciones de respuesta:</b> pocas (de 2 a 5), cortas y distintas. Ej: Manzana, Banano, Uva, Otra.</div>
+<p><b>Recolectar datos:</b> anotamos cada respuesta con una raya |. Cada 5 votos se hace un haz: 卌</p>
+<p><b>Tabla de frecuencia:</b> muestra cuántas veces (frecuencia) se repite cada respuesta. La suma de las frecuencias es el total de encuestados.</p>
+<table><tr><th>Fruta</th><th>Conteo</th><th>Frecuencia</th></tr><tr><td>Manzana</td><td>卌</td><td>5</td></tr><tr><td>Banano</td><td>卌 ||</td><td>7</td></tr><tr><td><b>Total</b></td><td></td><td><b>12</b></td></tr></table>
+<h3>📊 Cómo leer un gráfico de barras</h3>
+<p>1️⃣ Lee el <b>título</b>: dice de qué trata. 2️⃣ Mira abajo: cada barra es una <b>opción</b>. 3️⃣ Mira los números del lado izquierdo (la <b>escala</b>): la altura de la barra te dice cuántos votos tiene. 4️⃣ Compara: la barra <b>más alta</b> es la más votada y la <b>más baja</b> la menos votada.</p>
+<div class="tip">Para saber el valor de una barra, sigue con el dedo una línea desde la parte de arriba de la barra hasta los números de la izquierda.</div>
+<div style="max-width:420px" id="ex"></div>
+<p><b>Gráfico circular 🥧:</b> una «torta» dividida en porciones; la porción más grande es la más votada.</p>
+<button class="b" onclick="go(1)">📝 Ir a la evaluación ➡️</button></div></section>
+
+<section id="s1"><h2>📝 Evaluación (20 preguntas de selección múltiple)</h2>
+<p>Escoge una sola respuesta. En algunas preguntas debes mirar un gráfico de barras.</p>
+<div id="ev"></div><button class="b g no" onclick="calif()">✅ Calificar evaluación</button>
+<div id="rs"></div></section>
+</main>
+<script>
+const $=id=>document.getElementById(id),C=["#3a86ff","#ff006e","#ffbe0b","#2a9d8f","#8338ec"];
+/* ✏️ DOCENTE: escribe aquí el correo al que llegarán los informes, entre comillas. Ej: "profe@colegio.edu.co" */
+const CORREO_PROFE="rubencho47ia@gmail.com";
+/* ✏️ DOCENTE: pega aquí la URL de tu Apps Script (termina en /exec) para que el informe llegue solo al correo. Si queda vacío, el estudiante debe adjuntar el PDF manualmente. */
+const URL_ENVIO="https://script.google.com/macros/s/AKfycby3x1V_C5Y4OMua2p9jRpUpct2u3YoSV4zShrrMl9f7nbXyDySjbYFcewcURXLtaUYr/exec";
+const TOP=["Elaborar encuestas","Recolectar datos","Tablas de frecuencia","Gráficos de barras"];
+const TIP=["Repasa cómo se escribe una buena pregunta: clara, corta, con una sola idea y con ¿ ?, y opciones cortas y distintas.","Recuerda que se anota una raya por cada respuesta, de 5 en 5 con un haz 卌, y que el total es igual al número de encuestados.","Repasa que la frecuencia es cuántas veces se repite un dato y que la suma de todas da el total de encuestados.","Practica leyendo el título, las opciones y la escala. Sigue cada barra hasta los números de la izquierda; compara cuál es la más alta y cuál la más baja, y suma o resta los valores con cuidado."];
+const G=[{t:"Deporte favorito de los estudiantes de 4°A",d:[["Fútbol",12],["Baloncesto",8],["Natación",4],["Voleibol",6]]},
+{t:"Mascotas de los estudiantes",d:[["Perro",9],["Gato",6],["Pez",3],["Conejo",2]]},
+{t:"Fruta favorita del curso",d:[["Manzana",5],["Banano",10],["Uva",3],["Fresa",7]]}];
+/* [tema, pregunta, opciones, correcta, gráfico] */
+const EV=[
+[0,"¿Qué es una encuesta?",["Un juego de mesa","Hacer preguntas a varias personas para conocer sus gustos","Un dibujo","Una resta"],1],
+[0,"¿Cuál pregunta está mejor escrita?",["fruta","Me gusta la fruta","¿Cuál es tu fruta favorita?","Dime ya"],2],
+[0,"¿Cuántas ideas debe tener una pregunta?",["Muchas","Ninguna","Cinco","Una sola"],3],
+[0,"Las opciones de respuesta de una encuesta deben ser:",["Cortas y claras","Muy largas","Iguales a la pregunta","Secretas"],0],
+[0,"Para saber cuál es el juego favorito de tu curso, debes encuestar a:",["Solo a tu mejor amigo","A tus compañeros de curso","A nadie","A tu mascota"],1],
+[1,"Recolectar datos es:",["Borrar números","Pintar gráficos","Reunir las respuestas de los encuestados","Contar estrellas"],2],
+[1,"Si encuestas a 25 compañeros, ¿cuántas respuestas tienes por pregunta?",["10","25","50","5"],1],
+[2,"Si el conteo es 卌 ||, ¿cuántos votos hay?",["5","6","8","7"],3],
+[2,"La frecuencia es:",["El número de veces que se repite un dato","El color de la barra","El nombre de la encuesta","El título"],0],
+[2,"Perro tiene 8 votos y Gato 5. ¿Cuántos encuestados hubo?",["12","15","13","3"],2],
+[3,"Según el gráfico, ¿cuál deporte es el favorito (el más votado)?",["Baloncesto","Natación","Voleibol","Fútbol"],3,0],
+[3,"Según el gráfico, ¿cuántos estudiantes eligieron Baloncesto?",["8","6","10","4"],0,0],
+[3,"Según el gráfico, ¿qué deporte tuvo menos votos?",["Voleibol","Natación","Fútbol","Baloncesto"],1,0],
+[3,"¿Cuántos estudiantes más eligieron Fútbol que Voleibol?",["4","8","6","18"],2,0],
+[3,"¿Cuántos estudiantes se encuestaron en total?",["30","26","32","12"],0,0],
+[3,"Según el gráfico, ¿cuál mascota tiene la barra más alta?",["Gato","Perro","Pez","Conejo"],1,1],
+[3,"¿Cuántos estudiantes tienen Gato o Pez?",["6","12","3","9"],3,1],
+[3,"¿Cuántos votos más tiene Perro que Conejo?",["5","9","7","11"],2,1],
+[3,"Según el gráfico, ¿cuál fruta tiene la barra más baja?",["Uva","Manzana","Fresa","Banano"],0,2],
+[3,"La profesora quiere llevar una fruta que le guste a la mayoría. Según el gráfico, ¿cuál debe llevar?",["Uva","Fresa","Manzana","Banano"],3,2]];
+const dflt={name:"",ev:{},evDone:0,enviado:0};
+let S=JSON.parse(JSON.stringify(dflt));
+const P="enc4p:",clone=()=>JSON.parse(JSON.stringify(dflt)),esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},lsDel=k=>{try{localStorage.removeItem(k)}catch(e){}};
+let cur=lsGet("enc4last")||"";
+{const raw=lsGet(P+cur);if(raw){try{S=Object.assign(S,JSON.parse(raw))}catch(e){}}}
+function save(){const k=S.name.trim()||"sin nombre";if(cur&&cur!==k)lsDel(P+cur);cur=k;lsSet(P+k,JSON.stringify(S));lsSet("enc4last",k);profs()}
+function profs(){const n=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith(P))n.push(k.slice(P.length))}}catch(e){}
+const s=$("pf");s.innerHTML="";s.add(new Option("👤 Elegir estudiante…",""));n.sort().forEach(x=>s.add(new Option(x,x,0,x==cur)))}
+function refresh(){$("nm").value=S.name;quiz();res();profs();go(0)}
+function pickProf(v){if(!v)return;if(S.name.trim())save();const r=lsGet(P+v);if(!r)return;try{S=Object.assign(clone(),JSON.parse(r))}catch(e){return}cur=v;lsSet("enc4last",v);refresh()}
+function nuevo(){if(S.name.trim())save();S=clone();cur="";lsDel("enc4last");refresh();$("nm").focus()}
+function reset(){if(!confirm("¿Seguro? Se borrarán los datos de "+(S.name.trim()||"este estudiante")+". Si quieres conservarlos, primero guárdalos en un archivo 💾."))return;lsDel(P+cur);const nm=S.name;S=clone();S.name=nm;cur="";if(nm.trim())save();refresh()}
+function fileSave(){if(!S.name.trim())return alert("Escribe tu nombre primero ✏️");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:"application/json"}));a.download="avance_"+S.name.trim().replace(/\s+/g,"_")+".json";document.body.appendChild(a);a.click();a.remove();alert("¡Archivo guardado! ✅ Búscalo en tu carpeta de Descargas. Para seguir, usa 📂 Cargar archivo.")}
+function fileLoad(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||typeof d.ev!="object"||d.ev===null)throw 0;
+if(S.name.trim())save();
+S=Object.assign(clone(),{name:String(d.name||""),ev:d.ev,evDone:d.evDone?1:0,enviado:d.enviado?1:0});cur="";save();refresh();alert("¡Avance cargado! ✅")}catch(e){alert("Este archivo no es un avance válido")}};r.readAsText(f);inp.value=""}
+/* gráfico de barras */
+function bar(g){const m=Math.ceil(Math.max(...g.d.map(x=>x[1]))/2)*2,n=g.d.length,bw=250/n;
+let s=`<svg viewBox="0 0 320 200" role="img"><text x="170" y="16" text-anchor="middle" font-size="13" font-weight="bold" fill="currentColor">${g.t}</text><text x="10" y="105" font-size="10" fill="currentColor" transform="rotate(-90 10 105)" text-anchor="middle">Estudiantes</text>`;
+for(let v=0;v<=m;v+=2){const y=170-v/m*130;s+=`<line x1="40" y1="${y}" x2="310" y2="${y}" stroke="#889" stroke-opacity=".4"/><text x="34" y="${y+4}" text-anchor="end" font-size="10" fill="currentColor">${v}</text>`}
+g.d.forEach((e,j)=>{const h=e[1]/m*130,x=50+j*bw;s+=`<rect x="${x}" y="${170-h}" width="${bw-14}" height="${h}" fill="${C[j%5]}" rx="3"/><text x="${x+(bw-14)/2}" y="188" text-anchor="middle" font-size="11" fill="currentColor">${e[0]}</text>`});
+return s+"</svg>"}
+$("ex").innerHTML=bar({t:"Ejemplo: Color favorito",d:[["Azul",6],["Rojo",10],["Verde",4]]});
+/* evaluación */
+function quiz(){$("ev").innerHTML=EV.map((x,i)=>{const a=S.ev[i],sh=S.evDone;return `<div class="card"><span class="tag">${TOP[x[0]]}</span><br><b>${i+1}. ${x[1]}</b>${x[4]!=null?`<div style="max-width:420px">${bar(G[x[4]])}</div>`:""}`+x[2].map((o,j)=>`<button class="opt ${sh?(j==x[3]?"ok":j==a?"bad":""):(j==a?"sel":"")}" onclick="pick(${i},${j})">${o}</button>`).join("")+"</div>"}).join("")}
+function pick(i,j){if(S.evDone)return;S.ev[i]=j;save();quiz()}
+function calif(){if(S.evDone)return;if(!S.name.trim())return alert("Escribe tu nombre arriba ✏️");
+if(Object.keys(S.ev).length<20&&!confirm("Te faltan preguntas por responder. ¿Calificar igual?"))return;
+S.evDone=1;save();quiz();res();$("rs").scrollIntoView()}
+function calc(){const c=EV.filter((x,i)=>S.ev[i]==x[3]).length,sin=20-Object.keys(S.ev).length,fin=(c/20*5).toFixed(1);
+const dif=TOP.map((t,z)=>{const L=EV.map((x,i)=>[x,i]).filter(p=>p[0][0]==z);return{t,z,f:L.filter(p=>S.ev[p[1]]!=p[0][3]).length,n:L.length}}).filter(d=>d.f/d.n>=.4);
+return{c,sin,fin,dif}}
+/* informe PDF y envío */
+const pt=t=>String(t).replace(/卌/g,"||||/");
+function mkPdf(){const J=window.jspdf&&window.jspdf.jsPDF;if(!J)return null;
+const d=new J({unit:"mm",format:"letter"}),{c,sin,fin,dif}=calc(),W=d.internal.pageSize.getWidth()-30;let y=20;
+const line=(t,sz,b)=>{sz=sz||11;d.setFontSize(sz);d.setFont("helvetica",b?"bold":"normal");d.splitTextToSize(pt(t),W).forEach(l=>{if(y>268){d.addPage();y=20}d.text(l,15,y);y+=sz*0.4+1.3})};
+line("Informe de evaluación: La Encuesta (Estadística, grado 4°)",15,1);y+=2;
+line("Estudiante: "+S.name,12);line("Fecha: "+new Date().toLocaleDateString("es-CO"),12);
+line("Nota: "+fin+" / 5.0   ·   Correctas: "+c+" de 20"+(sin?"   ·   Sin responder: "+sin:""),13,1);y+=3;
+line("Dificultades observadas",13,1);
+if(dif.length)dif.forEach(x=>line("- "+x.t+" ("+x.f+" de "+x.n+" fallidas): "+TIP[x.z]));else line("No se observan dificultades importantes.");
+y+=3;line("Detalle de respuestas",13,1);
+EV.forEach((x,i)=>{const a=S.ev[i];line((i+1)+". "+x[1]+(x[4]!=null?" [Gráfico "+G[x[4]].t+": "+G[x[4]].d.map(e=>e[0]+" "+e[1]).join(", ")+"]":""),10,1);
+line("   Respondió: "+(a==null?"(sin responder)":x[2][a])+"  ->  "+(a==x[3]?"CORRECTA":"INCORRECTA. Respuesta correcta: "+x[2][x[3]]),10)});
+return d}
+const mail=(a,b)=>{location.href="mailto:"+CORREO_PROFE+"?subject="+encodeURIComponent(a)+"&body="+encodeURIComponent(b)};
+async function enviar(){if(!S.evDone)return alert("Primero califica la evaluación");
+if(URL_ENVIO)return auto();
+return manual()}
+async function auto(){const b=$("bsend"),{c,fin,dif}=calc(),nm=S.name.trim(),d=mkPdf();
+if(!d){alert("No se pudo crear el PDF (revisa tu conexión a internet).");return}
+const fn="informe_"+nm.replace(/\s+/g,"_")+".pdf";b.disabled=true;b.textContent="⏳ Enviando…";
+try{const b64=await new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(",")[1]);r.onerror=no;r.readAsDataURL(d.output("blob"))});
+await fetch(URL_ENVIO,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({nombre:nm,nota:fin,correctas:c,dificultades:dif.length?dif.map(x=>x.t).join(", "):"ninguna importante",archivo:fn,pdf:b64})});
+S.enviado=1;save();res();alert("¡Informe enviado a tu profesor! ✅")}
+catch(e){b.disabled=false;b.textContent="📧 Enviar informe al profesor";alert("No se pudo enviar automáticamente (revisa tu internet). Se usará el envío manual por correo.");manual()}}
+async function manual(){
+const{c,fin,dif}=calc(),nm=S.name.trim(),asunto="Evaluación La Encuesta - "+nm+" - Nota "+fin;
+const cuerpo=`Hola profe, envío mi evaluación.\nEstudiante: ${nm}\nNota: ${fin} / 5.0 (${c} de 20 correctas)\nDificultades: ${dif.length?dif.map(x=>x.t).join(", "):"ninguna importante"}\n\n(Adjunto mi informe en PDF)`;
+const d=mkPdf();
+if(!d){alert("No se pudo crear el PDF (revisa tu conexión a internet). Se abrirá la impresión: elige «Guardar como PDF» y luego adjúntalo al correo.");window.print();mail(asunto,cuerpo);return}
+const fn="informe_"+nm.replace(/\s+/g,"_")+".pdf",blob=d.output("blob"),f=new File([blob],fn,{type:"application/pdf"});
+if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:asunto,text:cuerpo+(CORREO_PROFE?"\n\nEnviar a: "+CORREO_PROFE:"")});return}catch(e){if(e.name=="AbortError")return}}
+const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();a.remove();
+alert("Se descargó tu informe en PDF 📄. Ahora se abrirá tu correo: ¡adjunta el PDF y envíalo!");
+mail(asunto,cuerpo)}
+function res(){const el=$("rs");if(!S.evDone){el.innerHTML="";return}
+const{c,sin,fin,dif}=calc();
+el.innerHTML=`<div class="card"><h2>🏆 Mi nota</h2><h3>${esc(S.name)}</h3><p class="big">${fin>=4?"🌟":fin>=3?"😊":"💪"} ${fin} / 5.0</p><p style="text-align:center">Respuestas correctas: ${c} de 20${sin?` · Sin responder: ${sin}`:""}</p>
+<h3>🔎 Dificultades observadas</h3>`+(dif.length?dif.map(d=>`<div class="tip"><b>${d.t}</b> (${d.f} de ${d.n} preguntas fallidas o sin responder)<br>💡 ${TIP[d.z]}</div>`).join(""):'<div class="tip">🎉 ¡No se observan dificultades importantes! Sigue así.</div>')+
+(S.enviado?'<div class="tip">✅ Tu informe ya fue enviado al profesor.</div>':"")+`<button id="bsend" class="b no" style="background:#ff006e" onclick="enviar()">📧 Enviar informe al profesor</button><button class="b no" onclick="window.print()">🖨️ Imprimir</button></div>`}
+/* navegación */
+const NAV=["📘 Teoría","📝 Evaluación"];
+$("nav").innerHTML=NAV.map((t,i)=>`<button onclick="go(${i})">${t}</button>`).join("");
+function go(n){document.querySelectorAll("section").forEach((s,i)=>s.classList.toggle("on",i==n));document.querySelectorAll("nav button").forEach((b,i)=>b.classList.toggle("on",i==n));scrollTo(0,0)}
+refresh();
+</script>
+</body>
+</html>
